@@ -1,5 +1,5 @@
 const firstPlayer = document.querySelector(".player-0");
-const secondPlayer = document.querySelector(".player-1");
+const virtualPlayer = document.querySelector(".player-1");
 const currentScore = document.querySelector(".current-value");
 const currentScoreE1 = document.getElementById("current-0");
 const currentScoreE2 = document.getElementById("current-1");
@@ -31,7 +31,7 @@ const init = () => {
     .querySelector(`.player-${activePlayer}`)
     .classList.remove("player-winner");
   firstPlayer.classList.add("player--active");
-  secondPlayer.classList.remove("player--active");
+  virtualPlayer.classList.remove("player--active");
   diceImg.classList.add("hidden");
 };
 
@@ -39,14 +39,56 @@ const switchPlayers = () => {
   document.getElementById(`current-${activePlayer}`).textContent = 0;
 
   firstPlayer.classList.toggle("player--active");
-  secondPlayer.classList.toggle("player--active");
-  activePlayer = secondPlayer.classList.contains("player--active") ? 1 : 0;
+  virtualPlayer.classList.toggle("player--active");
+
+  activePlayer = virtualPlayer.classList.contains("player--active") ? 1 : 0;
   playerCurrentScore = 0;
+
+  if (activePlayer === 1 && playing) virtualPlayerTurn();
+};
+
+const hold = () => {
+  if (playing) {
+    score[activePlayer] += playerCurrentScore;
+    document.getElementById(`score-${activePlayer}`).textContent =
+      score[activePlayer];
+
+    if (score[activePlayer] >= 100) {
+      playing = false;
+      document
+        .querySelector(`.player-${activePlayer}`)
+        .classList.add("player-winner");
+      document
+        .querySelector(`.player-${activePlayer}`)
+        .classList.add("active-player");
+      diceImg.classList.add("hidden");
+    } else {
+      switchPlayers();
+    }
+  }
+};
+
+const virtualPlayerTurn = () => {
+  setTimeout(() => {
+    let randomNumber = Math.floor(Math.random() * 6) + 1;
+    diceImg.src = `/img/dice-${randomNumber}.png`;
+
+    if (randomNumber !== 1) {
+      playerCurrentScore += randomNumber;
+      document.getElementById(`current-${activePlayer}`).textContent =
+        playerCurrentScore;
+
+      if (playerCurrentScore >= 15) hold();
+      else virtualPlayerTurn();
+    } else {
+      switchPlayers();
+    }
+  }, 1000);
 };
 
 rollDice.addEventListener("click", () => {
-  if (playing) {
-    const randomNumber = Math.floor(Math.random() * 6) + 1;
+  if (activePlayer === 0 && playing) {
+    let randomNumber = Math.floor(Math.random() * 6) + 1;
     diceImg.classList.remove("hidden");
     diceImg.src = `/img/dice-${randomNumber}.png`;
 
@@ -60,25 +102,5 @@ rollDice.addEventListener("click", () => {
   }
 });
 
-holdDIce.addEventListener("click", () => {
-  if (playing) {
-    score[activePlayer] += playerCurrentScore;
-    document.getElementById(`score-${activePlayer}`).textContent =
-      score[activePlayer];
-
-    if (score[activePlayer] >= 20) {
-      playing = false;
-      document
-        .querySelector(`.player-${activePlayer}`)
-        .classList.add("player-winner");
-      document
-        .querySelector(`.player-${activePlayer}`)
-        .classList.add("active-player");
-      diceImg.classList.add("hidden");
-    } else {
-      switchPlayers();
-    }
-  }
-});
-
+holdDIce.addEventListener("click", hold);
 nextGame.addEventListener("click", init);
