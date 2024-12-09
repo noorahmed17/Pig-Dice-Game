@@ -83,7 +83,7 @@ const virtualPlayerTurn = () => {
     } else {
       switchPlayers();
     }
-  }, 1000);
+  }, 1500);
 };
 
 rollDice.addEventListener("click", () => {
